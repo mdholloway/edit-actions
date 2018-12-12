@@ -63,14 +63,20 @@ function getEntityForTranslation(app, domain, cond, srcLang, dstLang) {
 
 router.get('/needs/description', (req, res) => {
     const domain = req.params.domain;
+    if (!domain.endsWith('wikipedia.org')) {
+        throw new sUtil.HttpError('invalid domain');
+    }
     const cond = p => !p.description && !p.pageprops.disambiguation;
     return getPage(app, domain, cond)
     .then(p => getPageSummary(domain, p.title.replace(/ /g, '_')))
     .then(s => res.status(200).json(s.body));
 });
 
-router.get('/needs/description/translation/in/:lang', (req, res) => {
+router.get('/needs/description/in/:lang', (req, res) => {
     const domain = req.params.domain;
+    if (!domain.endsWith('wikipedia.org')) {
+        throw new sUtil.HttpError('invalid domain');
+    }
     const srcLang = domain.split('.')[0];
     const dstLang = req.params.lang;
     if (srcLang === dstLang || !isValidLang(dstLang)) {
