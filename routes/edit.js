@@ -66,9 +66,9 @@ router.get('/needs/description', (req, res) => {
     if (!domain.endsWith('wikipedia.org')) {
         throw new sUtil.HttpError('invalid domain');
     }
-    const cond = p => !p.description && !p.pageprops.disambiguation;
+    const cond = p => !p.description && p.pageprops && !p.pageprops.disambiguation;
     return getPage(app, domain, cond)
-    .then(p => getPageSummary(domain, p.title.replace(/ /g, '_')))
+    .then(p => getPageSummary(domain, encodeURIComponent(p.title.replace(/ /g, '_'))))
     .then(s => res.status(200).json(s.body));
 });
 
@@ -82,9 +82,9 @@ router.get('/needs/description/in/:lang', (req, res) => {
     if (srcLang === dstLang || !isValidLang(dstLang)) {
         throw new sUtil.HttpError('invalid lang');
     }
-    const cond = p => !p.pageprops.disambiguation && p.pageprops.wikibase_item;
+    const cond = p => p.pageprops && !p.pageprops.disambiguation && p.pageprops.wikibase_item;
     return getEntityForTranslation(app, req.params.domain, cond, srcLang, dstLang)
-    .then(e => getPageSummary(domain, e.sitelinks[`${srcLang}wiki`].title))
+    .then(e => getPageSummary(domain, encodeURIComponent(e.sitelinks[`${srcLang}wiki`].title)))
     .then(s => res.status(200).json(s.body));
 });
 
